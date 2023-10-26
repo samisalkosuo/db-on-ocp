@@ -1,0 +1,63 @@
+= db-on-ocp
+
+Instructions to set up databases on OpenShift.
+
+Typical use case is that you need database for development or testing within the cluster. 
+
+== Usage
+
+* Clone this repository.
+* Login to your OpenShift cluster.
+* Follow the instructions below.
+
+== PostgreSQL
+
+* Modify YAMLs in postgresql-directory as needed.
+** For example, change password, statefulset and so on.
+* Install PostgreSQL:
+
+```
+sh ocp-postgresql.sh install <namespace-name>
+```
+
+* PostgreSQL username/password: `postgres/passw0rd`.
+* Access using psql-client (within cluster):
+
+```
+psql postgresql://postgres:passw0rd@postgres.postgresql-test1.svc.cluster.local/postgres
+```
+* Uninstall PostgreSQL:
+
+```
+sh ocp-postgresql.sh uninstall <namespace-name>
+```
+
+
+== MongoDB
+
+* Modify YAMLs in mongodb-directory as needed.
+** For example, change password, statefulset and so on.
+* Install MongoDB:
+
+```
+sh ocp-mongodb.sh install <namespace-name>
+```
+
+* MongoDB admin username/password: `admin/passw0rd`.
+* Access using mongosh-client (within cluster):
+
+```
+mongosh mongodb://admin:passw0rd@mongodb.<namespace-name>.svc.cluster.local:27017/?authSource=admin
+```
+
+* Uninstall MongoDB:
+
+```
+sh ocp-mongodb.sh uninstall <namespace-name>
+```
+
+== Credits
+
+PostgreSQL deployment inspired/based on https://kodekloud.com/blog/deploy-postgresql-kubernetes/.
+
+MongoDB deployment inspired/based on https://phoenixnap.com/kb/kubernetes-mongodb.

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      initContainers:      
+      - name: chmod-postgres-dirs
+        image: busybox:latest
+        #create directories and change owner of db directories
+        #modify as needed
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - >-
+              mkdir -p /pgsqldata/pgdata &&
+              mkdir -p /pgsqldata/icndb &&
+              mkdir -p /pgsqldata/aeos &&
+              mkdir -p /pgsqldata/bawdocs &&
+              mkdir -p /pgsqldata/bawdos &&
+              mkdir -p /pgsqldata/bawtos &&
+              mkdir -p /pgsqldata/devos1 &&
+              mkdir -p /pgsqldata/gcd &&
+              mkdir -p pgsqldata/os1db &&
+              mkdir -p pgsqldata/os2db &&
+              mkdir -p pgsqldata/os3db &&
+              mkdir -p pgsqldata/os4db &&
+              mkdir -p pgsqldata/os5db &&
+              /bin/chown -R 999 /pgsqldata        
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /pgsqldata
+      containers:
+        - name: postgres
+          securityContext:
+            #user 999 is defined in postgres container
+            fsGroup: 999
+            runAsUser: 999
+            runAsGroup: 999
+          image: docker.io/library/postgres:latest
+          args: ["-c", "config_file=/etc/postgresql/postgresql.conf"]
+          env:
+            - name: POSTGRES_USER 
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: password
+            - name: PGDATA
+              value: /pgsqldata/pgdata
+          ports:
+            - containerPort: 5432
+              name: postgres
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgsqldata/
+            - name: postgres-config
+              mountPath: /etc/postgresql
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+             claimName: postgres-data 
+        - name: postgres-config
+          configMap:
+            name: postgres-conf
+            items:
+            - key: postgresql.conf
+              path: postgresql.conf

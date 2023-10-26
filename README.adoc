@@ -1,6 +1,8 @@
 = db-on-ocp
+:toc: left
+:toc-title: Table of Contents
 
-Instructions to set up databases on OpenShift.
+Scripts to set up databases on OpenShift.
 
 Typical use case is that you need database for development or testing within the cluster. 
 
